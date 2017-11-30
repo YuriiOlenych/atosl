@@ -69,7 +69,13 @@ UUID: ca418bdf-c3ae-3e75-808b-fd3f57c8e
 
 * Doesn't display function parameters in the symbols
   * This could be added, it just wasn't deemed worth the cycles
-* Only supports ARM
+* Only supports:
+  * i386
+  * x86_64
+  * armv6
+  * armv7
+  * armv7s
+  * arm64
 
 ## Future Work
 
