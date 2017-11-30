@@ -59,6 +59,12 @@ looks through the DWARF complication units. If you use the --globals
 option it instead reads from the .debug_pubnames section. You should try
 both options to see which one you find most reliable and fastest.
 
+Also, you can get UUID:
+```
+$ atosl -o SomeApp.app.dSYM/Contents/Resources/DWARF/SomeApp -u
+UUID: ca418bdf-c3ae-3e75-808b-fd3f57c8e
+```
+
 ## Limitations and differences
 
 * Doesn't display function parameters in the symbols
