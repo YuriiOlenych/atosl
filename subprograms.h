@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 
-#include <dwarf.h>
+#include <libdwarf/dwarf.h>
 
 #include "common.h"
 

@@ -22,8 +22,8 @@
 #include <libgen.h>
 #include <limits.h>
 
-#include <dwarf.h>
-#include <libdwarf.h>
+#include <libdwarf/dwarf.h>
+#include <libdwarf/libdwarf.h>
 
 #include "atosl.h"
 #include "subprograms.h"
@@ -54,13 +54,15 @@ _dwarf_decode_u_leb128(Dwarf_Small * leb128,
     } while (0)
 
 static int debug = 0;
+static int print_uuid = 0;
 
-static const char *shortopts = "vl:o:A:gcC:VhD";
+static const char *shortopts = "vl:o:uA:gcC:VhD";
 static struct option longopts[] = {
     {"verbose", no_argument, NULL, 'v'},
     {"load-address", required_argument, NULL, 'l'},
     {"no-demangle", no_argument, NULL, 'D'},
     {"dsym", required_argument, NULL, 'o'},
+    {"uuid", no_argument, NULL, 'u'},
     {"arch", required_argument, NULL, 'A'},
     {"globals", no_argument, NULL, 'g'},
     {"no-cache", no_argument, NULL, 'c'},
@@ -76,6 +78,7 @@ static struct {
     cpu_subtype_t subtype;
 } arch_str_to_type[] = {
     {"i386", CPU_TYPE_I386, CPU_SUBTYPE_X86_ALL},
+    {"x86_64", CPU_TYPE_X86_64, CPU_SUBTYPE_X86_64_ALL},
     {"armv6",  CPU_TYPE_ARM, CPU_SUBTYPE_ARM_V6},
     {"armv7",  CPU_TYPE_ARM, CPU_SUBTYPE_ARM_V7},
     {"armv7s", CPU_TYPE_ARM, CPU_SUBTYPE_ARM_V7S},
@@ -204,17 +207,21 @@ char *demangle(const char *sym)
 
 int parse_uuid(dwarf_mach_object_access_internals_t *obj, uint32_t cmdsize)
 {
-    int i;
     int ret;
 
     ret = _read(obj->handle, context.uuid, UUID_LEN);
     if (ret < 0)
         fatal_file(ret);
 
-    if (debug) {
-        fprintf(stderr, "%10s ", "uuid");
+    if (debug || print_uuid) {
+        fprintf(stderr, "%s: ", "UUID");
+        int i;
         for (i = 0; i < UUID_LEN; i++) {
             fprintf(stderr, "%.02x", context.uuid[i]);
+            if (i == 3 || i == 5 || i == 7 || i == 9)
+            {
+                fprintf(stderr, "%s", "-");
+            }
         }
         fprintf(stderr, "\n");
     }
@@ -703,7 +710,8 @@ static int dwarf_mach_object_access_internals_init(
         fatal_file(ret);
     
     /* Need to skip 4 bytes of the reserved field of mach_header_64  */
-    if (header.cputype == CPU_TYPE_ARM64 && header.cpusubtype == CPU_SUBTYPE_ARM64_ALL) {
+    if ((header.cputype == CPU_TYPE_ARM64 && header.cpusubtype == CPU_SUBTYPE_ARM64_ALL)
+            || (header.cputype == CPU_TYPE_X86_64 && header.cpusubtype == CPU_SUBTYPE_X86_64_ALL)) {
         context.is_64 = 1;
         ret = lseek(obj->handle, sizeof(uint32_t), SEEK_CUR);
         if (ret < 0)
@@ -1141,6 +1149,9 @@ int main(int argc, char *argv[]) {
             case 'o':
                 options.dsym_filename = optarg;
                 break;
+            case 'u':
+                print_uuid = 1;
+                break;
             case 'A':
                 for (i = 0; i < NUMOF(arch_str_to_type); i++) {
                     if (strcmp(arch_str_to_type[i].name, optarg) == 0) {
@@ -1246,7 +1257,7 @@ int main(int argc, char *argv[]) {
     if (magic != MH_MAGIC && magic != MH_MAGIC_64)
       fatal("invalid magic for architecture");
 
-    if (argc <= optind)
+    if (argc <= optind && !print_uuid)
         fatal_usage("no addresses specified");
 
     dwarf_mach_object_access_init(fd, &binary_interface, &derr);

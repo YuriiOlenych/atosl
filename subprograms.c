@@ -19,8 +19,8 @@
 #include <errno.h>
 #include <libgen.h>
 
-#include <dwarf.h>
-#include <libdwarf.h>
+#include <libdwarf/dwarf.h>
+#include <libdwarf/libdwarf.h>
 
 #include "subprograms.h"
 #include "common.h"

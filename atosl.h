@@ -42,6 +42,8 @@
 
 #define N_FUN 0x24
 
+#define CPU_ARCH_ABI64	0x01000000
+
 #define CPU_TYPE_ARM ((cpu_type_t)12)
 #define CPU_SUBTYPE_ARM_V6 ((cpu_subtype_t)6)
 #define CPU_SUBTYPE_ARM_V7 ((cpu_subtype_t)9)
@@ -51,6 +53,8 @@
 #define CPU_SUBTYPE_ARM64_ALL ((cpu_subtype_t)0)
 
 #define CPU_TYPE_I386 ((cpu_type_t)7)
+#define	CPU_TYPE_X86_64 (CPU_TYPE_I386 | CPU_ARCH_ABI64)
+#define CPU_SUBTYPE_X86_64_ALL ((cpu_subtype_t)3)
 #define CPU_SUBTYPE_X86_ALL ((cpu_subtype_t)3)
 
 #define N_ARM_THUMB_DEF 0x0008
